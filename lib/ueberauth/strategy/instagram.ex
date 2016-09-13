@@ -38,7 +38,7 @@ defmodule Ueberauth.Strategy.Instagram do
   """
   def handle_callback!(%Plug.Conn{params: %{"code" => code}} = conn) do
     opts = [redirect_uri: callback_url(conn)]
-    token = Ueberauth.Strategy.Instagram.OAuth.get_token!([code: code], opts)
+    token = Ueberauth.Strategy.Instagram.OAuth.get_token!([code: code], opts).token
 
     if token.access_token == nil do
       err = token.other_params["error"]

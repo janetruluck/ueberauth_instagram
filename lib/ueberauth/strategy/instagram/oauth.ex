@@ -27,6 +27,7 @@ defmodule Ueberauth.Strategy.Instagram.OAuth do
   def client(opts \\ []) do
     config = Application.get_env(:ueberauth, Ueberauth.Strategy.Instagram.OAuth)
 
+
     opts =
       @defaults
       |> Keyword.merge(config)
@@ -58,6 +59,9 @@ defmodule Ueberauth.Strategy.Instagram.OAuth do
   end
 
   def get_token(client, params, headers) do
+    params =
+      params
+      |> Keyword.put(:client_secret, client.client_secret)
     client
     |> put_header("Accept", "application/json")
     |> OAuth2.Strategy.AuthCode.get_token(params, headers)
