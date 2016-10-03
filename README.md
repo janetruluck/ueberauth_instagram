@@ -31,7 +31,7 @@
     ```elixir
     config :ueberauth, Ueberauth,
       providers: [
-        instagram: {Ueberauth.Strategy.instagram, []}
+        instagram: {Ueberauth.Strategy.Instagram, []}
       ]
     ```
 
