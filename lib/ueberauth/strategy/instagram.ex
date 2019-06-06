@@ -126,12 +126,6 @@ defmodule Ueberauth.Strategy.Instagram do
     put_private(conn, :instagram_user, user)
   end
 
-  defp user_query(conn) do
-    conn
-    |> Map.merge(query_params(conn, :profile))
-    |> URI.encode_query
-  end
-
   defp option(conn, key) do
     default = Dict.get(default_options, key)
 
