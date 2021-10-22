@@ -3,13 +3,14 @@ defmodule Ueberauth.Strategy.Instagram do
   Instagram Strategy for Überauth.
   """
 
-  use Ueberauth.Strategy, default_scope: "public_content",
-                          uid_field: :id,
-                          allowed_request_params: [
-                            :auth_type,
-                            :scope
-                          ]
-
+  use Ueberauth.Strategy,
+    default_scope: "user_profile",
+    uid_field: :id,
+    allowed_request_params: [
+      :auth_type,
+      :scope
+    ],
+    ignores_csrf_attack: Mix.env() == :dev
 
   alias Ueberauth.Auth.Info
   alias Ueberauth.Auth.Credentials
@@ -19,16 +20,18 @@ defmodule Ueberauth.Strategy.Instagram do
   Handles initial request for Instagram authentication.
   """
   def handle_request!(conn) do
-    allowed_params = conn
-     |> option(:allowed_request_params)
-     |> Enum.map(&to_string/1)
+    allowed_params =
+      conn
+      |> option(:allowed_request_params)
+      |> Enum.map(&to_string/1)
 
-    authorize_url = conn.params
+    authorize_url =
+      conn.params
       |> maybe_replace_param(conn, "scope", :default_scope)
-      |> Enum.filter(fn {k,_v} -> Enum.member?(allowed_params, k) end)
-      |> Enum.map(fn {k,v} -> {String.to_existing_atom(k), v} end)
+      |> Enum.filter(fn {k, _v} -> Enum.member?(allowed_params, k) end)
+      |> Enum.map(fn {k, v} -> {String.to_existing_atom(k), v} end)
       |> Keyword.put(:redirect_uri, callback_url(conn))
-      |> Ueberauth.Strategy.Instagram.OAuth.authorize_url!
+      |> Ueberauth.Strategy.Instagram.OAuth.authorize_url!()
 
     redirect!(conn, authorize_url)
   end
@@ -126,19 +129,14 @@ defmodule Ueberauth.Strategy.Instagram do
     put_private(conn, :instagram_user, user)
   end
 
-  defp user_query(conn) do
-    conn
-    |> Map.merge(query_params(conn, :profile))
-    |> URI.encode_query
-  end
-
   defp option(conn, key) do
-    default = Dict.get(default_options, key)
+    default = Keyword.get(default_options(), key)
 
     conn
     |> options
-    |> Dict.get(key, default)
+    |> Keyword.get(key, default)
   end
+
   defp option(nil, conn, key), do: option(conn, key)
   defp option(value, _conn, _key), do: value
 
